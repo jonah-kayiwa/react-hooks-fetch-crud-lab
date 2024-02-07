@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import QuestionItem from "./QuestionItem";
 
-function QuestionItem({ question }) {
-  const { id, prompt, answers, correctIndex } = question;
+function QuestionList() {
+  const [questions, setQuestions] = useState([]);
 
-  const options = answers.map((answer, index) => (
-    <option key={index} value={index}>
-      {answer}
-    </option>
-  ));
+  useEffect(() => {
+    async function fetchQuestions() {
+      const response = await fetch("http://localhost:4000/questions");
+      const data = await response.json();
+      setQuestions(data);
+    }
+
+    fetchQuestions();
+  }, []);
+
+  const handleDeleteQuestion = (deletedId) => {
+    setQuestions((prevQuestions) =>
+      prevQuestions.filter((question) => question.id !== deletedId)
+    );
+  };
 
   return (
-    <li>
-      <h4>Question {id}</h4>
-      <h5>Prompt: {prompt}</h5>
-      <label>
-        Correct Answer:
-        <select defaultValue={correctIndex}>{options}</select>
-      </label>
-      <button>Delete Question</button>
-    </li>
+    <section>
+      <h1>Quiz Questions</h1>
+      <ul>
+        {questions.map((question) => (
+          <QuestionItem
+            key={question.id}
+            question={question}
+            onDelete={handleDeleteQuestion}
+          />
+        ))}
+      </ul>
+    </section>
   );
 }
 
-export default QuestionItem;
+export default QuestionList;
